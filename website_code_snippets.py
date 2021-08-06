@@ -13,6 +13,7 @@ docs = DocumentArray([doc1, doc2])
 from jina import Executor, requests, DocumentArray
 import numpy as np
 
+
 class CharEmbed(Executor):  # a simple character embedding with mean-pooling
     offset = 32  # letter `a`
     dim = 127 - offset + 1  # last pos reserved for `UNK`
@@ -21,15 +22,23 @@ class CharEmbed(Executor):  # a simple character embedding with mean-pooling
     @requests
     def encode(self, docs: DocumentArray, **kwargs):
         for doc in docs:
-            r_emb = [ord(c) - self.offset if self.offset <= ord(c) <= 127 else (self.dim - 1) for c in doc.text]
+            r_emb = [
+                ord(c) - self.offset if self.offset <= ord(c) <= 127 else (self.dim - 1)
+                for c in doc.text
+            ]
             doc.embedding = self.char_embd[r_emb, :].mean(axis=0)  # average pooling
+
 
 # Flows
 
 from jina import Flow
 
-flow = Flow().add(uses=CharEmbed).add(uses="jinahub+docker://SimpleIndexer")
+flow = (
+    Flow()
+    .add(uses=CharEmbed)
+    .add(uses="jinahub+docker://SimpleIndexer")
+)
 
 with flow:
-    flow.index()
+    flow.index(docs)
     flow.search(Document(text="howdy earth"))
