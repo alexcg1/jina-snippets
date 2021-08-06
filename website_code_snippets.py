@@ -15,7 +15,7 @@ import numpy as np
 
 class NumpyEmbed(Executor):
     @requests
-    def encode(self, docs):
+    def encode(self, docs, **kwargs):
         for d in docs:
             d.embedding = np.random.random(10)
 
